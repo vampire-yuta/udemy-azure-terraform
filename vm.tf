@@ -58,7 +58,7 @@ resource "azurerm_virtual_machine" "main" {
   location              = local.location
   resource_group_name   = azurerm_resource_group.resource_group.name
   network_interface_ids = [azurerm_network_interface.main.id]
-  vm_size               = "Standard_DS1_v2"
+  vm_size               = "Standard_D2_v3"
 
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"
@@ -97,23 +97,6 @@ resource "azurerm_virtual_machine" "main" {
 //SETTINGS
 //}
 
-resource "azurerm_virtual_machine_extension" "iis" {
-  name                 = "IIS"
-  virtual_machine_id   = azurerm_virtual_machine.main.id
-  publisher            = "Microsoft.Compute"
-  type                 = "CustomScriptExtension"
-  type_handler_version = "1.9"
-
-  settings = <<SETTINGS
-    {
-        "commandToExecute": "powershell.exe -Command Add-WindowsFeature Web-Server;powershell.exe -Command Install-WindowsFeature Web-Asp-Net45"
-    }
-SETTINGS
-
-  tags = {
-    environment = "Production"
-  }
-}
 
 resource "azurerm_public_ip" "bastion" {
   name                = "examplepip"
@@ -132,5 +115,42 @@ resource "azurerm_bastion_host" "bastion" {
     name                 = "configuration"
     subnet_id            = azurerm_subnet.bastion.id
     public_ip_address_id = azurerm_public_ip.bastion.id
+  }
+}
+
+resource "azurerm_virtual_machine_extension" "install_iis" {
+  name                 = "Install-IIS"
+  virtual_machine_id   = azurerm_virtual_machine.main.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "powershell -Command Install-WindowsFeature Web-Server -IncludeManagementTools ; powershell -Command Install-WindowsFeature Web-Asp-Net45"
+    }
+SETTINGS
+
+  tags = {
+    environment = "Production"
+  }
+}
+
+
+resource "azurerm_virtual_machine_extension" "install_ssms" {
+  name                 = "Install-SSMS"
+  virtual_machine_id   = azurerm_virtual_machine.main.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "powershell -Command Invoke-WebRequest -Uri https://aka.ms/ssmsfullsetup -OutFile SSMS-Setup.exe ; ./SSMS-Setup.exe /install /quiet /log installlog.txt"
+    }
+SETTINGS
+
+  tags = {
+    environment = "Production"
   }
 }
