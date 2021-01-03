@@ -17,7 +17,7 @@ locals {
   sqlserver_name           = "udemy-sqlserver"
   sqlserver_admin_name     = "udemyadmin"
   sqlserver_admin_password = "P@ssw0rd!1233"
-sqlserver_vnet_rule = "udemy-sqlserver-vnet-rule"
+  sqlserver_vnet_rule      = "udemy-sqlserver-vnet-rule"
 
   // SQL Database
   sqldatabase_name = "udemy-lesson-db"

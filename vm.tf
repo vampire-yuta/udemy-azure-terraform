@@ -83,21 +83,37 @@ resource "azurerm_virtual_machine" "main" {
   }
 }
 
-#resource "azurerm_virtual_machine_extension" "example" {
-#  name                 = "IIS"
-#  location             = var.location
-#  resource_group_name  = azurerm_resource_group.resource_group.name
-#  virtual_machine_name = azurerm_virtual_machine.main.name
-#  publisher            = "Microsoft.Compute"
-#  type                 = "CustomScriptExtension"
-#  type_handler_version = "1.9"
-#
-#  settings = <<SETTINGS
-#    {
-#        "commandToExecute": "powershell.exe -Command Add-WindowsFeature Web-Server"
-#    }
-#SETTINGS
-#}
+//resource "azurerm_virtual_machine_extension" "example" {
+//  name                 = "IIS"
+//  publisher            = "Microsoft.Azure.Extensions"
+//  type                 = "CustomScript"
+//  type_handler_version = "2.0"
+//  virtual_machine_id = azurerm_virtual_machine.main.id
+//
+//  settings = <<SETTINGS
+//    {
+//        "commandToExecute": "powershell.exe -Command Add-WindowsFeature Web-Server"
+//    }
+//SETTINGS
+//}
+
+resource "azurerm_virtual_machine_extension" "iis" {
+  name                 = "IIS"
+  virtual_machine_id   = azurerm_virtual_machine.main.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "powershell.exe -Command Add-WindowsFeature Web-Server;powershell.exe -Command Install-WindowsFeature Web-Asp-Net45"
+    }
+SETTINGS
+
+  tags = {
+    environment = "Production"
+  }
+}
 
 resource "azurerm_public_ip" "bastion" {
   name                = "examplepip"
