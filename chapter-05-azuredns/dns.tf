@@ -14,4 +14,4 @@ resource "azurerm_dns_a_record" "lb" {
 
 output "azure_dns_nameservers" {
   value = azurerm_dns_zone.example-public.name_servers
-t }
+}

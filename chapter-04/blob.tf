@@ -5,7 +5,7 @@ resource "azurerm_storage_account" "example" {
   account_tier             = "Standard"
   account_replication_type = "LRS"
   // 本来はPublicにはしないと思う
-//  allow_blob_public_access = true
+  //  allow_blob_public_access = true
   allow_blob_public_access = false
 }
 
@@ -22,7 +22,7 @@ resource "azurerm_storage_container" "example" {
   name                  = "tools"
   storage_account_name  = azurerm_storage_account.example.name
   container_access_type = "private"
-//  container_access_type = "blob"
+  //  container_access_type = "blob"
 }
 
 resource "azurerm_storage_blob" "example" {
