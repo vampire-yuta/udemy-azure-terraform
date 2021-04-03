@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager">
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/AWS_Container" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/azure-oauth2" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/go-azure" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/go-oidc" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/oauth2-azure" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/odic" />
+    <content url="file:////wsl$/Ubuntu-20.04/home/yuta/oidc" />
+    <content url="file://$USER_HOME$/goauth" />
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

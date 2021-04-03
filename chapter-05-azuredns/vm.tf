@@ -6,7 +6,7 @@ resource "azurerm_network_interface" "main" {
 
   ip_configuration {
     name                          = "testconfiguration1"
-    subnet_id                     = azurerm_subnet.Private.id
+    subnet_id                     = azurerm_subnet.Public.id
     private_ip_address_allocation = "Dynamic"
     //    public_ip_address_id          = azurerm_public_ip.main.id
   }
@@ -53,12 +53,6 @@ resource "azurerm_network_security_rule" "HTTP" {
   network_security_group_name = azurerm_network_security_group.main.name
 }
 
-resource "azurerm_network_interface_security_group_association" "association" {
-  network_interface_id      = azurerm_network_interface.main.id
-  network_security_group_id = azurerm_network_security_group.main.id
-}
-
-
 resource "azurerm_virtual_machine" "main" {
   name                  = local.vm_name
   location              = local.location
@@ -89,6 +83,21 @@ resource "azurerm_virtual_machine" "main" {
   }
 }
 
+//resource "azurerm_virtual_machine_extension" "example" {
+//  name                 = "IIS"
+//  publisher            = "Microsoft.Azure.Extensions"
+//  type                 = "CustomScript"
+//  type_handler_version = "2.0"
+//  virtual_machine_id = azurerm_virtual_machine.main.id
+//
+//  settings = <<SETTINGS
+//    {
+//        "commandToExecute": "powershell.exe -Command Add-WindowsFeature Web-Server"
+//    }
+//SETTINGS
+//}
+
+
 resource "azurerm_public_ip" "bastion" {
   name                = "examplepip"
   location            = azurerm_resource_group.resource_group.location
@@ -109,27 +118,39 @@ resource "azurerm_bastion_host" "bastion" {
   }
 }
 
-resource "azurerm_virtual_machine_extension" "install_tools_ssms" {
-  name                 = "Install-tools"
+resource "azurerm_virtual_machine_extension" "install_iis" {
+  name                 = "Install-IIS"
   virtual_machine_id   = azurerm_virtual_machine.main.id
   publisher            = "Microsoft.Compute"
   type                 = "CustomScriptExtension"
   type_handler_version = "1.9"
 
   settings = <<SETTINGS
-      {
-        "fileUris": [
-            "${azurerm_storage_blob.example.url}${data.azurerm_storage_account_sas.example.sas}"
-        ],
-        "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File \"install.ps1\""
+    {
+        "commandToExecute": "powershell -Command Install-WindowsFeature Web-Server -IncludeManagementTools ; powershell -Command Install-WindowsFeature Web-Asp-Net45"
     }
-    SETTINGS
+SETTINGS
 
   tags = {
     environment = "Production"
   }
+}
 
-  depends_on = [
-    azurerm_storage_blob.example
-  ]
+
+resource "azurerm_virtual_machine_extension" "install_ssms" {
+  name                 = "Install-SSMS"
+  virtual_machine_id   = azurerm_virtual_machine.main.id
+  publisher            = "Microsoft.Compute"
+  type                 = "CustomScriptExtension"
+  type_handler_version = "1.9"
+
+  settings = <<SETTINGS
+    {
+        "commandToExecute": "powershell -Command Invoke-WebRequest -Uri https://aka.ms/ssmsfullsetup -OutFile ./SSMS-Setup.exe ; Start-Process -FilePath ./SSMS-Setup.exe -ArgumentList \"/install /quiet /norestart /log installlog.txt\" -Verb runas -Wait"
+    }
+SETTINGS
+
+  tags = {
+    environment = "Production"
+  }
 }
